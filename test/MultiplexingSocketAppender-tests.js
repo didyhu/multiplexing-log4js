@@ -1,9 +1,9 @@
 const { MessageSocketServer } = require('message-socket-server')
 const log4js = require('log4js')
 const delay = require('delay')
-const StreamAppender = require('../lib/StreamAppender')
+const MultiplexingSocketAppender = require('../lib/MultiplexingSocketAppender')
 
-describe("StreamAppender-tests", () => {
+describe("MultiplexingSocketAppender-tests", () => {
     let _server
     /**
      * @returns {MessageSocketServer}
@@ -35,7 +35,7 @@ describe("StreamAppender-tests", () => {
                 cmd: { value: 20001, colour: 'green' }
             },
             appenders: {
-                default: StreamAppender.createConfig("127.0.0.1", 1234),
+                default: MultiplexingSocketAppender.createConfig("127.0.0.1", 1234),
             },
             categories: {
                 default: { appenders: ["default"], level: "all" }
