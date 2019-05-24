@@ -9,11 +9,13 @@
     "test": "mocha"
   },
   "dependencies": {
+    "date-format": "^2.0.0",
     "delay": "^4.2.0",
     "log4js": "^4.3.0",
     "message-socket-server": "^1.0.3"
   },
   "devDependencies": {
+    "fs-extra": "^8.0.1",
     "mocha": "^6.1.4"
   }
 }

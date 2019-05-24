@@ -1,3 +1,4 @@
+'use strict'
 const { MessageSocketServer } = require('message-socket-server')
 const log4js = require('log4js')
 const delay = require('delay')
