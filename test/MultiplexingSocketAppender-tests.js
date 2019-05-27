@@ -16,7 +16,6 @@ describe("MultiplexingSocketAppender-tests", () => {
         _server = new MessageSocketServer()
         server().listen(1234)
         server().on("listening", address => {
-            console.debug("address", address)
             done()
         })
     })
@@ -25,7 +24,6 @@ describe("MultiplexingSocketAppender-tests", () => {
             socket.on("message", message => {
                 const { basicLayout } = require("log4js/lib/layouts")
                 message.level.toString = () => message.level.levelStr
-                console.log(basicLayout(message))
                 if (message.level.levelStr == "CMD" && message.data[0] == "close") {
                     done()
                 }
@@ -36,7 +34,9 @@ describe("MultiplexingSocketAppender-tests", () => {
                 cmd: { value: 20001, colour: 'green' }
             },
             appenders: {
-                default: MultiplexingSocketAppender.createConfig("127.0.0.1", 1234),
+                default: MultiplexingSocketAppender.createConfig("127.0.0.1", 1234, (event, writer) => {
+                    return true
+                }),
             },
             categories: {
                 default: { appenders: ["default"], level: "all" }
@@ -52,7 +52,6 @@ describe("MultiplexingSocketAppender-tests", () => {
             await delay(100)
             log4js.shutdown(err => {
                 if (err) return console.error(err)
-                console.info("shutdown")
             })
             await delay(100)
             server().close()

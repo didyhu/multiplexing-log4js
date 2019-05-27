@@ -12,19 +12,28 @@ describe("ControlledDateRollingFileStream-tests", () => {
         Promise.resolve().then(async () => {
             const dir = await fse.mkdtemp("test")
             const filename = path.join(dir, "test.log"), pattern = "yyyy-MM-dd_hh_mm_ss"
-            const listener = (event) => {
-                assert(event.data[0] == "foo" && event.data[1] == "bar")
-                log4js.shutdown(async (error) => {
-                    if (error) {
-                        throw error
-                    }
-                    const files = await fse.readdir(dir)
-                    assert(files.length == 1)
-                    await fse.remove(dir)
-                    done()
-                })
+            const listener = (event, writer) => {
+                if (event.level.levelStr == "CMD" && event.data[0] == "hold") {
+                    writer.hold(true)
+                    return false
+                }
+                if (event.level.levelStr == "CMD" && event.data[0] == "shutdown") {
+                    log4js.shutdown(async (error) => {
+                        if (error) {
+                            throw error
+                        }
+                        const files = await fse.readdir(dir)
+                        assert(files.length == 1)
+                        await fse.remove(dir)
+                        done()
+                    })
+                    return false
+                }
             }
             log4js.configure({
+                levels: {
+                    "CMD": { value: 20001, colour: "green" }
+                },
                 appenders: {
                     default: MultiplexingFileAppender.createConfig(filename, pattern, listener)
                 },
@@ -39,7 +48,7 @@ describe("ControlledDateRollingFileStream-tests", () => {
                 logger.info("foo")
                 await delay(500)
             }
-            logger.log("EVENT", "foo", "bar")
+            logger.log("CMD", "shutdown")
         })
     }).timeout(5000)
 })

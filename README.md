@@ -6,13 +6,13 @@ You can send logs to server side over socket, and also control the appender's st
 
 Example:
 
-server side:
+## server side:
 
 ```js
 log4js.configure({
     appenders: {
-        file: MultiplexingFileAppender.createConfig(filename, pattern, listener),
-        server: MultiplexingSocketServerAppender.createConfig(port)
+        file: MultiplexingFileAppender.createConfig(filename, pattern, listener1),
+        server: MultiplexingSocketServerAppender.createConfig(port,listener2)
     },
     categories: {
         default: { appenders: ["file"], level: "all" }
@@ -20,20 +20,31 @@ log4js.configure({
 })
 ```
 
-client side:
+* `listener1: (loggingEvent, writer:ControlledDateRollingFileStream) => boolean`
+* `listener2: (loggingEvent, server:MessageSocketServer) => boolean`
+
+## client side:
 
 ```js
 log4js.configure({
+    levels:{
+        "EVENT": { value: 20001, colour: "green" }
+    },
     appenders: {
-        socket: MultiplexingSocketAppender.createConfig("127.0.0.1", 1234),
+        socket: MultiplexingSocketAppender.createConfig("127.0.0.1", 1234, listener),
     },
     categories: {
         default: { appenders: ["socket"], level: "all" }
     }
 })
 const logger = log4js.getLogger("test")
-logger.info("test info") // normal logging, will be writed to file at server side.
-logger.log("CMD", "hold") // set MultiplexingFileAppender state to "hold", and it won't roll new file.
-logger.log("CMD", "release") // release hold.
-logger.log("EVENT", "something") // fire the listener at server side.
+logger.info("test info") // normal logging
+logger.log("EVENT", "something") // custom event
+// all of them can be caught by the listeners
 ```
+
+* `listener: (loggingEvent, writer:AutoReconnectMessageSocketWriter) => boolean`
+
+## listener
+
+listeners return false means the logging event is to be stopped.
